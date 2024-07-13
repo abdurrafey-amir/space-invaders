@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import time
 
 
 # functions
@@ -11,8 +12,15 @@ def ship_ani():
     if ship.left <= 0:
         ship.left = 0
 
-def proj_ani():
-    proj.y += proj_speed_y
+def enemy_ani():
+    global enemy_speed, current_time
+    enemy.x += enemy_speed
+    if enemy.right >= screen_width:
+        enemy.right = screen_width
+        enemy_speed *= -1
+    if enemy.left <= 0:
+        enemy.left = 0
+        enemy_speed *= -1
 
 # general setup
 pygame.init()
@@ -28,7 +36,8 @@ pygame.display.set_caption('Space Invaders')
 
 ship = pygame.Rect(screen_width/2 - 15, screen_height - 50, 30, 30)
 enemy = pygame.Rect(screen_width/2 - 30, 50, 60, 30)
-proj = pygame.Rect(enemy.left + 23, enemy.bottom + 5, 10, 50)
+proj = pygame.Rect(enemy.left + 23, enemy.bottom + 5, 30, 30)
+
 
 # colors
 bg_color = pygame.Color('grey12')
@@ -36,6 +45,7 @@ light_grey = (200, 200, 200)
 
 # speed
 ship_speed = 0
+enemy_speed = 7 * random.choice((1, -1))
 proj_speed_y = 7
 
 # main loop
@@ -59,14 +69,26 @@ while True:
 
     # functions
     ship_ani()
-    proj_ani()
+    enemy_ani()    
+    
+        
 
     # visuals
     screen.fill(bg_color)
     pygame.draw.rect(screen, light_grey, ship)
     pygame.draw.rect(screen, light_grey, enemy)
-    pygame.draw.rect(screen, light_grey, proj)
+    pygame.draw.ellipse(screen, light_grey, proj)
 
+
+
+    for i in range(10):
+        proj.y += proj_speed_y
+        new = proj.copy()
+        pygame.draw.rect(screen, light_grey, new)
+
+    
+    
+        
     # updating the window
     pygame.display.flip()
     clock.tick(60)
