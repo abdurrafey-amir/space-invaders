@@ -12,6 +12,8 @@ def ship_ani():
     if ship.left <= 0:
         ship.left = 0
 
+    
+
 def enemy_ani():
     global enemy_speed
     enemy.x += enemy_speed
@@ -32,6 +34,7 @@ def proj_ani():
 
 
 # general setup
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
 clock = pygame.time.Clock()
 
@@ -52,7 +55,10 @@ projectiles = []
 
 
 bg_color = pygame.Color('grey12')
+bg = pygame.image.load('background.png')
 light_grey = (200, 200, 200)
+font = pygame.font.Font("freesansbold.ttf", 32)
+shoot_sound = pygame.mixer.Sound('shoot.wav')
 
 # speed
 ship_speed = 0
@@ -60,6 +66,8 @@ enemy_speed = 7 * random.choice((1, -1))
 proj_speed_y = 7
 bullet_speed_y = 7
 proj_time = 0
+score = 0
+
 # main loop
 while True:
     # handling input
@@ -76,7 +84,8 @@ while True:
             if event.key == pygame.K_SPACE:
                 new_bullet = pygame.Rect(ship.left, ship.top - 30, 15, 15)
                 bullets.append(new_bullet)
-                proj_time = pygame.time.get_ticks()
+                pygame.mixer.Sound.play(shoot_sound)
+                # proj_time = pygame.time.get_ticks()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_RIGHT:
                 ship_speed -= 7
@@ -96,26 +105,34 @@ while True:
     
     # visuals
     screen.fill(bg_color)
+    screen.blit(bg, (0, 0))
     pygame.draw.rect(screen, light_grey, ship)
     pygame.draw.rect(screen, light_grey, enemy)
 
 
+    # score
+    score_text = font.render(f'{score}', False, light_grey)
+    screen.blit(score_text, (screen_width/2, 20))
+
+
+
+
     # Spawn projectile once every second
     
-    current_time = pygame.time.get_ticks()
-    if current_time - proj_time >= 1000:  # 1000 ms = 1 second
-        proj_time = current_time
-        proj_ani()  # spawn a new projectile
-    
-    
     # current_time = pygame.time.get_ticks()
-    # if current_time - proj_time > 700:
-        for proj in projectiles:
-            print(proj.y)
-            proj.y += proj_speed_y
-            pygame.draw.ellipse(screen, light_grey, proj)
-            if proj.bottom >= screen_height:
-                projectiles.remove(proj)
+    # if current_time - proj_time >= 1000:  # 1000 ms = 1 second
+    #     proj_time = current_time
+    #     proj_ani()  # spawn a new projectile
+    
+    
+    # # current_time = pygame.time.get_ticks()
+    # # if current_time - proj_time > 700:
+    #     for proj in projectiles:
+    #         print(proj.y)
+    #         proj.y += proj_speed_y
+    #         pygame.draw.ellipse(screen, light_grey, proj)
+    #         if proj.bottom >= screen_height:
+    #             projectiles.remove(proj)
     
     
     
@@ -124,6 +141,9 @@ while True:
             bullet.y -= bullet_speed_y
             pygame.draw.ellipse(screen, light_grey, bullet)
             if bullet.top <= 0:
+                bullets.remove(bullet)
+            if bullet.colliderect(enemy):
+                score += 1
                 bullets.remove(bullet)
     
         
